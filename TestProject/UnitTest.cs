@@ -11,10 +11,23 @@ namespace TestProject
         }
 
         [TestMethod]
-        public void TestMethod()
+        public void Test1()
         {
-            throw new System.Exception("TEST EXCEPTION");
+
         }
+
+        [TestMethod]
+        public void Test2()
+        {
+
+        }
+
+        [TestMethod]
+        public void Test3()
+        {
+
+        }
+
 
         bool testOutputField(string input_field, string expected)
         {
