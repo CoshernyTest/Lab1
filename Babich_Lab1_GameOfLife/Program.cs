@@ -5,6 +5,7 @@ string path_in = "input.txt";
 string path_out = "output.txt";
 
 bool[,] initial_field;  // Вместо char клетка является bool. True = живая, False = мертвая
+ConwaysMatrix matrix;
 int generations = -1;
 int[] size = new int[2];
 
@@ -16,14 +17,16 @@ using (StreamReader sr = new StreamReader(path_in, System.Text.Encoding.Default)
 
     initial_field = new bool[size[0], size[1]];
 
+    string textField = sr.ReadToEnd();
+    string[] lines = textField.Split("\r\n");
+
     // Чтение матрицы
+    matrix = ConvertTextToMatrix(lines);
     for (int y = 0; y < size[1]; y++)
     {
-        string line = sr.ReadLine();
-
         for (int x = 0; x < size[0]; x++)
         {
-            initial_field[x, y] = (line[x] == 'x');
+            initial_field[x, y] = (lines[y][x] == 'x');
         }
     }
 }
@@ -31,132 +34,158 @@ using (StreamReader sr = new StreamReader(path_in, System.Text.Encoding.Default)
 
 #region ОБРАБОТКА ИНФОРМАЦИИ
 
-bool[,] new_field = LiveSteps(initial_field, generations);
-string result = ConwaysMatrixToText(new_field);
+bool[,] new_field = ConwaysMatrix.LiveSteps(initial_field, generations);
+string result = ConwaysMatrix.ConwaysMatrixToText(new_field);
 
 #endregion 
 
 #region ЗАПИСЬ/ВЫВОД
 using (StreamWriter sw = new StreamWriter(path_out, false, System.Text.Encoding.Default))
 {
-    sw.Write("\r\n\r\n");
     sw.Write(result);
 }
 #endregion
 
 
 #region МЕТОДЫ
-static int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
+ConwaysMatrix ConvertTextToMatrix(string[] lines)
 {
-    int count = 0;
+    bool[,] field = new bool[lines[0].Length, lines.GetLength(0)];
 
-    // rel_x, rel_y - координаты соседней клетки относительно центральной, проверяемой клетки
-    for (int rel_y = -1; rel_y <= 1; rel_y++)
+    for (int y = 0; y < size[1]; y++)
     {
-        for (int rel_x = -1; rel_x <= 1; rel_x++)
+        for (int x = 0; x < size[0]; x++)
         {
-            if (rel_y == 0 && rel_x == 0) { continue; } // При отн. координатах (0,0) проверяется центральная клетка - нет смысла
-            else if (GetCellStatus(field, cell_x + rel_x, cell_y + rel_y)) {  count++; }
+            field[x, y] = (lines[y][x] == 'x');
         }
     }
 
-    return count;
+    return new ConwaysMatrix(field);
 }
 
-//
-// Рассчитывает новое состояние клетки
-//
-bool GetNewCellStatus(bool[,] field, int cell_x, int cell_y)
+class ConwaysMatrix
 {
-    bool new_status = false;
-    bool cur_status = GetCellStatus(field, cell_x, cell_y);
-    int neighbours = CountAliveNeighbors(field, cell_x, cell_y);
+    public bool[,] InitialField;
 
-    if (cur_status) // Если клетка жива
+    public ConwaysMatrix() { }
+
+    public ConwaysMatrix(bool[,] initialField)
     {
-        if (neighbours > 3 || neighbours < 2)
+        InitialField = initialField;
+    }
+
+    internal static int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
+    {
+        int count = 0;
+
+        // rel_x, rel_y - координаты соседней клетки относительно центральной, проверяемой клетки
+        for (int rel_y = -1; rel_y <= 1; rel_y++)
         {
-            new_status = false; // Умирает
+            for (int rel_x = -1; rel_x <= 1; rel_x++)
+            {
+                if (rel_y == 0 && rel_x == 0) { continue; } // При отн. координатах (0,0) проверяется центральная клетка - нет смысла
+                else if (GetCellStatus(field, cell_x + rel_x, cell_y + rel_y)) { count++; }
+            }
         }
-        else { new_status = true; }
-    }
-    else   // Если клетка мертва
-    {
-        if (neighbours == 3)
-        { new_status = true; } // Оживает
+
+        return count;
     }
 
-    return new_status;
-}
-
-//
-// Узнает текущее состояние клетки
-//
-static bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
-{
-    cell_x %= field.GetLength(0);   // Если справа от крайней правой клетки
-    cell_y %= field.GetLength(1);   // Если снизу от крайней нижней клетки
-
-    if (cell_x == -1) { cell_x = field.GetLength(0) - 1; } // Если слева от крайней левой клетки
-    if (cell_y == -1) { cell_y = field.GetLength(1) - 1; } // Если сверху от крайней верхней клетки
-
-
-    return field[cell_x, cell_y];
-}
-
-bool[,] LiveSteps(bool[,] initial_field, int steps) 
-{
-    bool[,] new_field = (bool[,])initial_field.Clone();
-
-    //Console.WriteLine("STARTING STATE");
-    //Console.WriteLine(ConwaysMatrixToText(initial_field));
-
-    for (int i = 0; i < steps; i++) 
+    //
+    // Рассчитывает новое состояние клетки
+    //
+    internal static bool GetNewCellStatus(bool[,] field, int cell_x, int cell_y)
     {
-        //Console.WriteLine("GENERATION " + i.ToString());
-        new_field = LiveOneStep(new_field);
-        //Console.WriteLine(ConwaysMatrixToText(new_field));
-    }
+        bool new_status = false;
+        bool cur_status = GetCellStatus(field, cell_x, cell_y);
+        int neighbours = CountAliveNeighbors(field, cell_x, cell_y);
 
-    return new_field;
-}
-
-bool[,] LiveOneStep(bool[,] field) 
-{
-    int size_x = field.GetLength(0);
-    int size_y = field.GetLength(1);
-    bool[,] new_field = (bool[,])field.Clone();
-
-    for (int y = 0; y < size_y; y++)
-    {
-        for (int x = 0; x < size_x; x++)
+        if (cur_status) // Если клетка жива
         {
-            new_field[x, y] = GetNewCellStatus(field, x, y);
+            if (neighbours > 3 || neighbours < 2)
+            {
+                new_status = false; // Умирает
+            }
+            else { new_status = true; }
         }
-    }
-
-    return new_field; 
-}
-
-string ConwaysMatrixToText(bool[,] field)
-{
-    var text = "";
-
-    for (int y = 0; y < field.GetLength(1); y++)
-    {
-        for (int x = 0; x < field.GetLength(0); x++)
+        else   // Если клетка мертва
         {
-            if (field[x, y]) { text += 'x'; }
-            else { text += '.'; }
+            if (neighbours == 3)
+            { new_status = true; } // Оживает
         }
-        text += "\r\n";
+
+        return new_status;
     }
 
-    return text;
+    //
+    // Узнает текущее состояние клетки
+    //
+    internal static bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
+    {
+        cell_x %= field.GetLength(0);   // Если справа от крайней правой клетки
+        cell_y %= field.GetLength(1);   // Если снизу от крайней нижней клетки
+
+        if (cell_x == -1) { cell_x = field.GetLength(0) - 1; } // Если слева от крайней левой клетки
+        if (cell_y == -1) { cell_y = field.GetLength(1) - 1; } // Если сверху от крайней верхней клетки
+
+
+        return field[cell_x, cell_y];
+    }
+
+    internal static bool[,] LiveSteps(bool[,] initial_field, int steps)
+    {
+        bool[,] new_field = (bool[,])initial_field.Clone();
+
+        //Console.WriteLine("STARTING STATE");
+        //Console.WriteLine(ConwaysMatrixToText(initial_field));
+
+        for (int i = 0; i < steps; i++)
+        {
+            //Console.WriteLine("GENERATION " + i.ToString());
+            new_field = LiveOneStep(new_field);
+            //Console.WriteLine(ConwaysMatrixToText(new_field));
+        }
+
+        return new_field;
+    }
+
+    internal static bool[,] LiveOneStep(bool[,] field)
+    {
+        int size_x = field.GetLength(0);
+        int size_y = field.GetLength(1);
+        bool[,] new_field = (bool[,])field.Clone();
+
+        for (int y = 0; y < size_y; y++)
+        {
+            for (int x = 0; x < size_x; x++)
+            {
+                new_field[x, y] = GetNewCellStatus(field, x, y);
+            }
+        }
+
+        return new_field;
+    }
+
+    internal static string ConwaysMatrixToText(bool[,] field)
+    {
+        var text = "\r\n\r\n";
+
+        for (int y = 0; y < field.GetLength(1); y++)
+        {
+            for (int x = 0; x < field.GetLength(0); x++)
+            {
+                if (field[x, y]) { text += 'x'; }
+                else { text += '.'; }
+            }
+            text += "\r\n";
+        }
+
+        return text;
+    }
 }
 #endregion
 
 public class TestClass222
 {
-    void TestClassTestMethod() { Console.WriteLine("TestClass TestClassTestMethod()"); }
+    public void TestClassTestMethod() { Console.WriteLine("TestClass TestClassTestMethod()"); }
 }

@@ -7,13 +7,14 @@ namespace TestProject
     {
         public UnitTest()
         {
-
+            
         }
 
         [TestMethod]
         public void TestMethod()
         {
-            
+            TestClass222 testClass222 = new TestClass222();
+            testClass222.TestClassTestMethod();
         }
 
         bool testOutputField(string input_field, string expected)
