@@ -7,7 +7,7 @@ namespace TestProject
     {
         public UnitTest()
         {
-            Babych_Lab1_GameOfLife.c
+
         }
 
         [TestMethod]
