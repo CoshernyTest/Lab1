@@ -184,8 +184,3 @@ class ConwaysMatrix
     }
 }
 #endregion
-
-public class TestClass222
-{
-    public void TestClassTestMethod() { Console.WriteLine("TestClass TestClassTestMethod()"); }
-}
