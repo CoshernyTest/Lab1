@@ -46,7 +46,7 @@ using (StreamWriter sw = new StreamWriter(path_out, false, System.Text.Encoding.
 
 
 #region МЕТОДЫ
-int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
+static int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
 {
     int count = 0;
 
@@ -92,7 +92,7 @@ bool GetNewCellStatus(bool[,] field, int cell_x, int cell_y)
 //
 // Узнает текущее состояние клетки
 //
-bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
+static bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
 {
     cell_x %= field.GetLength(0);   // Если справа от крайней правой клетки
     cell_y %= field.GetLength(1);   // Если снизу от крайней нижней клетки
@@ -155,3 +155,8 @@ string ConwaysMatrixToText(bool[,] field)
     return text;
 }
 #endregion
+
+public class TestClass222
+{
+    void TestClassTestMethod() { Console.WriteLine("TestClass TestClassTestMethod()"); }
+}
