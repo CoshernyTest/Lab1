@@ -13,7 +13,7 @@ namespace TestProject
         [TestMethod]
         public void TestMethod()
         {
-
+            throw new System.Exception("TEST EXCEPTION");
         }
 
         bool testOutputField(string input_field, string expected)
