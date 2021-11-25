@@ -65,8 +65,8 @@ public class Converter
 
     public static string ConwaysMatrixToText(bool[,] field)
     {
-        //var text = "\r\n\r\n";
-        var text = "absdsvsdvsdvsdvsdvsd\r\n\r\n";
+        var text = "\r\n\r\n";
+        //var text = "absdsvsdvsdvsdvsdvsd\r\n\r\n";
 
         for (int y = 0; y < field.GetLength(1); y++)
         {
