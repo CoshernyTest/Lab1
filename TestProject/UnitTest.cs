@@ -13,7 +13,8 @@ namespace TestProject
         [TestMethod]
         public void Test1()
         {
-
+            string input = "";
+            ConwaysMatrix matrix = Converter.ConvertTextToMatrix(input.Split("\r\n"));
         }
 
         [TestMethod]

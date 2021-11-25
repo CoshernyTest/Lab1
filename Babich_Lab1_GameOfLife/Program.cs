@@ -4,8 +4,7 @@ using System.IO;
 string path_in = "input.txt";
 string path_out = "output.txt";
 
-bool[,] initial_field;  // Вместо char клетка является bool. True = живая, False = мертвая
-ConwaysMatrix matrix;
+ConwaysMatrix matrix = new ConwaysMatrix();
 int generations = -1;
 int[] size = new int[2];
 
@@ -15,27 +14,18 @@ using (StreamReader sr = new StreamReader(path_in, System.Text.Encoding.Default)
     generations = Convert.ToInt32(sr.ReadLine());
     size = Array.ConvertAll(sr.ReadLine().Split(' '), s => int.Parse(s));
 
-    initial_field = new bool[size[0], size[1]];
-
     string textField = sr.ReadToEnd();
     string[] lines = textField.Split("\r\n");
 
     // Чтение матрицы
-    matrix = ConvertTextToMatrix(lines);
-    for (int y = 0; y < size[1]; y++)
-    {
-        for (int x = 0; x < size[0]; x++)
-        {
-            initial_field[x, y] = (lines[y][x] == 'x');
-        }
-    }
+    matrix = Converter.ConvertTextToMatrix(lines);
 }
 #endregion
 
 #region ОБРАБОТКА ИНФОРМАЦИИ
 
-bool[,] new_field = ConwaysMatrix.LiveSteps(initial_field, generations);
-string result = ConwaysMatrix.ConwaysMatrixToText(new_field);
+matrix.Field = matrix.LiveSteps(matrix.Field, generations);
+string result = Converter.ConwaysMatrixToText(matrix.Field);
 
 #endregion 
 
@@ -48,33 +38,59 @@ using (StreamWriter sw = new StreamWriter(path_out, false, System.Text.Encoding.
 
 
 #region МЕТОДЫ
-ConwaysMatrix ConvertTextToMatrix(string[] lines)
-{
-    bool[,] field = new bool[lines[0].Length, lines.GetLength(0)];
 
-    for (int y = 0; y < size[1]; y++)
+public class Converter
+{
+    public static ConwaysMatrix ConvertTextToMatrix(string[] lines)
     {
-        for (int x = 0; x < size[0]; x++)
+        bool[,] field = new bool[lines[0].Length, lines.GetLength(0)];
+
+        for (int y = 0; y < lines.GetLength(0); y++)
         {
-            field[x, y] = (lines[y][x] == 'x');
+            if (lines[y] != "")
+            {
+                for (int x = 0; x < lines[0].Length; x++)
+                {
+                    field[x, y] = (lines[y][x] == 'x');
+                }
+            }
         }
+
+        return new ConwaysMatrix(field);
     }
 
-    return new ConwaysMatrix(field);
+
+    public static string ConwaysMatrixToText(bool[,] field)
+    {
+        var text = "\r\n\r\n";
+
+        for (int y = 0; y < field.GetLength(1); y++)
+        {
+            for (int x = 0; x < field.GetLength(0); x++)
+            {
+                if (field[x, y]) { text += 'x'; }
+                else { text += '.'; }
+            }
+            text += "\r\n";
+        }
+
+        return text;
+    }
 }
 
-class ConwaysMatrix
+public class ConwaysMatrix
 {
-    public bool[,] InitialField;
+    public bool[,] Field;
+    public int Generations;
 
     public ConwaysMatrix() { }
 
     public ConwaysMatrix(bool[,] initialField)
     {
-        InitialField = initialField;
+        Field = initialField;
     }
 
-    internal static int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
+    public int CountAliveNeighbors(bool[,] field, int cell_x, int cell_y)
     {
         int count = 0;
 
@@ -94,7 +110,7 @@ class ConwaysMatrix
     //
     // Рассчитывает новое состояние клетки
     //
-    internal static bool GetNewCellStatus(bool[,] field, int cell_x, int cell_y)
+    public bool GetNewCellStatus(bool[,] field, int cell_x, int cell_y)
     {
         bool new_status = false;
         bool cur_status = GetCellStatus(field, cell_x, cell_y);
@@ -120,7 +136,7 @@ class ConwaysMatrix
     //
     // Узнает текущее состояние клетки
     //
-    internal static bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
+    public bool GetCellStatus(bool[,] field, int cell_x, int cell_y)
     {
         cell_x %= field.GetLength(0);   // Если справа от крайней правой клетки
         cell_y %= field.GetLength(1);   // Если снизу от крайней нижней клетки
@@ -132,14 +148,14 @@ class ConwaysMatrix
         return field[cell_x, cell_y];
     }
 
-    internal static bool[,] LiveSteps(bool[,] initial_field, int steps)
+    public bool[,] LiveSteps(bool[,] initial_field, int _gens)
     {
         bool[,] new_field = (bool[,])initial_field.Clone();
 
         //Console.WriteLine("STARTING STATE");
         //Console.WriteLine(ConwaysMatrixToText(initial_field));
 
-        for (int i = 0; i < steps; i++)
+        for (int i = 0; i < _gens; i++)
         {
             //Console.WriteLine("GENERATION " + i.ToString());
             new_field = LiveOneStep(new_field);
@@ -149,7 +165,7 @@ class ConwaysMatrix
         return new_field;
     }
 
-    internal static bool[,] LiveOneStep(bool[,] field)
+    public bool[,] LiveOneStep(bool[,] field)
     {
         int size_x = field.GetLength(0);
         int size_y = field.GetLength(1);
@@ -164,23 +180,6 @@ class ConwaysMatrix
         }
 
         return new_field;
-    }
-
-    internal static string ConwaysMatrixToText(bool[,] field)
-    {
-        var text = "\r\n\r\n";
-
-        for (int y = 0; y < field.GetLength(1); y++)
-        {
-            for (int x = 0; x < field.GetLength(0); x++)
-            {
-                if (field[x, y]) { text += 'x'; }
-                else { text += '.'; }
-            }
-            text += "\r\n";
-        }
-
-        return text;
     }
 }
 #endregion
