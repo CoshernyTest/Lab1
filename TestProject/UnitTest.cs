@@ -36,12 +36,5 @@ namespace TestProject
 
             if (output != expected) { throw new System.Exception("TEST 1 FAILED"); }
         }
-
-
-        bool testOutputField(string input_field, string expected)
-        {
-
-            return true;
-        }
     }
 }
