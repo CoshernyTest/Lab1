@@ -13,13 +13,13 @@ namespace TestProject
         [TestMethod]
         public void Test1()
         {
+            int generations = 3;
             string input = "" +
                 "........\r\n" +
                 "..x.....\r\n" +
                 "..x.....\r\n" +
                 "..x.....\r\n" +
-                "........\r\n";
-            int generations = 3;
+                "........";
             string expected = "" +
                 "\r\n" +
                 "\r\n" +

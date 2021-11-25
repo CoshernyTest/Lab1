@@ -43,6 +43,9 @@ public class Converter
 {
     public static ConwaysMatrix ConvertTextToMatrix(string[] lines)
     {
+        int size_x = lines[0].Length;
+        int size_y = lines.GetLength(0);
+
         bool[,] field = new bool[lines[0].Length, lines.GetLength(0)];
 
         for (int y = 0; y < lines.GetLength(0); y++)
@@ -63,6 +66,7 @@ public class Converter
     public static string ConwaysMatrixToText(bool[,] field)
     {
         var text = "\r\n\r\n";
+        //var text = "absdsvsdvsdvsdvsdvsd\r\n\r\n";
 
         for (int y = 0; y < field.GetLength(1); y++)
         {
