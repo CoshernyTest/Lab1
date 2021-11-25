@@ -13,20 +13,28 @@ namespace TestProject
         [TestMethod]
         public void Test1()
         {
-            string input = "";
+            string input = "" +
+                "........\r\n" +
+                "..x.....\r\n" +
+                "..x.....\r\n" +
+                "..x.....\r\n" +
+                "........\r\n";
+            int generations = 3;
+            string expected = "" +
+                "\r\n" +
+                "\r\n" +
+                "........\r\n" +
+                "........\r\n" +
+                ".xxx....\r\n" +
+                "........\r\n" +
+                "........\r\n";
+
             ConwaysMatrix matrix = Converter.ConvertTextToMatrix(input.Split("\r\n"));
-        }
+            matrix.Field = matrix.LiveSteps(matrix.Field, generations);
+            
+            string output = Converter.ConwaysMatrixToText(matrix.Field);
 
-        [TestMethod]
-        public void Test2()
-        {
-
-        }
-
-        [TestMethod]
-        public void Test3()
-        {
-
+            if (output != expected) { throw new System.Exception("TEST 1 FAILED"); }
         }
 
 
